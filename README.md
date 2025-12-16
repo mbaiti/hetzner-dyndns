@@ -33,8 +33,8 @@ Hetzner has integrated the management of its DNS zones into the Hetzner Cloud AP
 ### Generate API Token
 
 1.  Log in to your [Hetzner Cloud Console](https://console.hetzner.cloud/).
-2.  Navigate to "Access" -> "API Tokens".
-3.  Create a new API Token. Give it a descriptive name (e.g., "hetzner-dyndns").
+2.  Navigate to "Security" -> "API Tokens".
+3.  Create a new API Token. Give it a descriptive name (e.g., "hetzner-ddns").
 4.  Ensure that the token has at least the permission to **read and write DNS records**.
 5.  Copy the generated token. It will be needed for the `HETZNER_CLOUD_API_TOKEN` environment variable.
 
