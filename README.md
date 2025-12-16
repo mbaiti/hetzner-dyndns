@@ -1,65 +1,65 @@
-# Hetzner DynDNS (Cloud API)
+# Hetzner Dynamic DNS Update via Cloud API
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker Pulls](https://img.shields.io/docker/pulls/mbaiti/hetzner-dyndns.svg)](https://hub.docker.com/r/mbaiti/hetzner-dyndns)
+[![Docker Pulls](https://img.shields.io/docker/pulls/mbaiti/hetzner-ddns.svg)](https://hub.docker.com/r/mbaiti/hetzner-ddns)
 
-Ein schlanker Dynamic DNS Updater für Hetzner DNS-Einträge, der die neue Hetzner Cloud API verwendet. Dieses Tool überwacht deine öffentliche IP-Adresse und aktualisiert automatisch einen spezifischen A-Record in deiner Hetzner DNS-Zone, falls sich die IP-Adresse ändert. Ideal für Heimserver oder andere dynamische IP-Umgebungen.
+A slim Dynamic DNS Updater for Hetzner DNS entries, which uses the new Hetzner Cloud API. This tool monitors your public IP address and automatically updates a specific A-record in your Hetzner DNS zone if the IP address changes. Ideal for home servers or other dynamic IP environments.
 
-Dieses Projekt ist eine angepasste Version des ursprünglichen `filiparag/hetzner_ddns`, wurde aber komplett auf den Betrieb in einem Docker-Container mit Umgebungsvariablen optimiert.
+This project is an adapted version of the original `filiparag/hetzner_ddns`, but has been completely optimized for operation in a Docker container with environment variables.
 
 ## Features
 
-*   **Verwendet die neue Hetzner Cloud API:** Kompatibel mit der aktuellen Hetzner DNS-Verwaltung.
-*   **Containerisiert:** Läuft zuverlässig und isoliert in einem Docker-Container.
-*   **Konfiguration über Umgebungsvariablen:** Einfache und sichere Konfiguration mit `docker-compose`.
-*   **Automatische IP-Erkennung:** Prüft regelmäßig die öffentliche IPv4-Adresse.
-*   **Minimalistisch:** Schlankes Alpine Linux-Basis-Image und reines Shell-Skript für geringen Ressourcenverbrauch.
-*   **Zuverlässig:** Aktualisiert den DNS-Eintrag nur bei IP-Änderung.
+*   **Uses the new Hetzner Cloud API:** Compatible with current Hetzner DNS management.
+*   **Containerized:** Runs reliably and isolated in a Docker container.
+*   **Configuration via Environment Variables:** Simple and secure configuration with `docker-compose`.
+*   **Automatic IP Detection:** Regularly checks the public IPv4 address.
+*   **Minimalist:** Slim Alpine Linux-based image and pure shell script for low resource consumption.
+*   **Reliable:** Updates the DNS entry only when the IP changes.
 
-## Hintergrund zur API-Umstellung
+## Background on API Transition
 
-Hetzner hat die Verwaltung seiner DNS-Zonen in die Hetzner Cloud API integriert. Die alte dedizierte Hetzner DNS Console API ist nicht mehr die empfohlene Methode. Dieses Skript wurde entwickelt, um diese neue API-Struktur zu unterstützen. Dies erfordert die Verwendung eines API-Tokens aus der Hetzner Cloud Konsole und angepasste API-Endpunkte für die DNS-Verwaltung.
+Hetzner has integrated the management of its DNS zones into the Hetzner Cloud API. The old dedicated Hetzner DNS Console API is no longer the recommended method. This script was developed to support this new API structure. This requires using an API token from the Hetzner Cloud Console and adapted API endpoints for DNS management.
 
-## Voraussetzungen
+## Prerequisites
 
-*   Docker und Docker Compose installiert
-*   Ein Hetzner Cloud Konto
-*   Eine DNS-Zone, die in die Hetzner Cloud Konsole migriert wurde (falls sie ursprünglich in der DNS Console erstellt wurde).
+*   Docker and Docker Compose installed
+*   A Hetzner Cloud account
+*   A DNS zone migrated to the Hetzner Cloud Console (if it was originally created in the DNS Console).
 
-## Einrichtung
+## Setup
 
-### API Token generieren
+### Generate API Token
 
-1.  Melde dich in deiner [Hetzner Cloud Konsole](https://console.hetzner.cloud/) an.
-2.  Navigiere zu "Access" -> "API Tokens".
-3.  Erstelle einen neuen API Token. Gib ihm einen sprechenden Namen (z.B. "hetzner-dyndns").
-4.  Stelle sicher, dass der Token mindestens die Berechtigung zum **Lesen und Schreiben von DNS-Records** hat.
-5.  Kopiere den generierten Token. Er wird für die Umgebungsvariable `HETZNER_CLOUD_API_TOKEN` benötigt.
+1.  Log in to your [Hetzner Cloud Console](https://console.hetzner.cloud/).
+2.  Navigate to "Access" -> "API Tokens".
+3.  Create a new API Token. Give it a descriptive name (e.g., "hetzner-dyndns").
+4.  Ensure that the token has at least the permission to **read and write DNS records**.
+5.  Copy the generated token. It will be needed for the `HETZNER_CLOUD_API_TOKEN` environment variable.
 
-### DNS Zone und Record vorbereiten
+### Prepare DNS Zone and Record
 
-1.  Stelle sicher, dass die DNS-Zone, die du aktualisieren möchtest, in der Hetzner Cloud Konsole sichtbar und verwaltbar ist. Falls nicht, musst du sie eventuell manuell migrieren.
-2.  Erstelle einen A-Record für den Hostnamen, den du aktualisieren möchtest (z.B. `myhome.example.com` oder `@` für die Domain selbst), und gib ihm einen Platzhalter-Wert (z.B. `127.0.0.1`). Das Skript wird diesen Wert später überschreiben.
+1.  Ensure that the DNS zone you want to update is visible and manageable in the Hetzner Cloud Console. If not, you may need to migrate it manually.
+2.  Create an A-record for the hostname you want to update (e.g., `myhome.example.com` or `@` for the domain itself), and provide a placeholder value (e.g., `127.0.0.1`). The script will overwrite this value later.
 
-### Docker-Compose Beispiel 
+### Docker-Compose Example
 
 ```yaml
 services:
-  hetzner-dyndns:
-    image: mbaiti/hetzner-dyndns:latest
-    container_name: hetzner-dyndns
+  hetzner-ddns:
+    image: mbaiti/hetzner-ddns:latest
+    container_name: hetzner-ddns
     restart: unless-stopped
     environment:
-      - HETZNER_CLOUD_API_TOKEN=dein_hetzner_cloud_api_token
-      - HETZNER_DNS_ZONE_NAME=deine_domain.com #Der Name deiner DNS-Zone (z.B. "example.com")
-      - HETZNER_DNS_RECORD_NAME=subdomain_oder_@ #z.B. "myhost" für myhost.deine_domain.com oder "@" für deine_domain.com
+      - HETZNER_CLOUD_API_TOKEN=your_hetzner_cloud_api_token
+      - HETZNER_DNS_ZONE_NAME=your-domain.com #The name of your DNS zone (e.g., "example.com")
+      - HETZNER_DNS_RECORD_NAME=subdomain_or_@ #e.g. "myhost" for myhost.your_domain.com or "@" for your_domain.com
       - CHECK_INTERVAL_SECONDS=300
 ```
 
 ### Logging
-Das Skript gibt Logs mit Zeitstempeln und dem Status der Operationen aus.
+The script outputs logs with timestamps and the status of operations.
 
-* **INFO:** Für normale Operationen und erfolgreiche Updates.
-* **DEBUG:** Detailliertere Informationen (z.B. wenn keine IP-Änderung erkannt wird). Wird in der aktuellen Version nicht verwendet, könnte aber bei Bedarf erweitert werden.
-* **WARNING:** Für nicht-kritische Probleme (z.B. IP-Ermittlung fehlgeschlagen).
-* **ERROR:** Für kritische Fehler (z.B. API-Fehler, fehlende Konfiguration).
+* **INFO:** For normal operations and successful updates.
+* **DEBUG:** More detailed information (e.g., when no IP change is detected). Not used in the current version, but could be extended if needed.
+* **WARNING:** For non-critical issues (e.g., IP detection failed).
+* **ERROR:** For critical errors (e.g., API errors, missing configuration).
