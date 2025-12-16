@@ -59,7 +59,7 @@ services:
 ### Logging
 Das Skript gibt Logs mit Zeitstempeln und dem Status der Operationen aus.
 
-**INFO:** Für normale Operationen und erfolgreiche Updates.
-**DEBUG:** Detailliertere Informationen (z.B. wenn keine IP-Änderung erkannt wird). Wird in der aktuellen Version nicht verwendet, könnte aber bei Bedarf erweitert werden.
-**WARNING:** Für nicht-kritische Probleme (z.B. IP-Ermittlung fehlgeschlagen).
-**ERROR:** Für kritische Fehler (z.B. API-Fehler, fehlende Konfiguration).
+* **INFO:** Für normale Operationen und erfolgreiche Updates.
+* **DEBUG:** Detailliertere Informationen (z.B. wenn keine IP-Änderung erkannt wird). Wird in der aktuellen Version nicht verwendet, könnte aber bei Bedarf erweitert werden.
+* **WARNING:** Für nicht-kritische Probleme (z.B. IP-Ermittlung fehlgeschlagen).
+* **ERROR:** Für kritische Fehler (z.B. API-Fehler, fehlende Konfiguration).
