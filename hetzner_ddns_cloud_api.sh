@@ -26,11 +26,13 @@ log "DNS Record Name: $HETZNER_DNS_RECORD_NAME"
 
 # check Zone ID
 get_zone_id() {
+  # KORREKTUR HIER: Endpunkt von /v1/dns_zones zu /v1/zones geändert
   ZONE_INFO=$(curl -s -X GET \
     -H "Authorization: Bearer $HETZNER_CLOUD_API_TOKEN" \
-    "https://api.hetzner.cloud/v1/dns_zones?name=$HETZNER_DNS_ZONE_NAME")
+    "https://api.hetzner.cloud/v1/zones?name=$HETZNER_DNS_ZONE_NAME") # <<< Hier ist die Änderung
 
-  ZONE_ID=$(echo "$ZONE_INFO" | jq -r '.dns_zones[] | select(.name == "'"$HETZNER_DNS_ZONE_NAME"'") | .id')
+  ZONE_ID=$(echo "$ZONE_INFO" | jq -r '.zones[] | select(.name == "'"$HETZNER_DNS_ZONE_NAME"'") | .id')
+  # KORREKTUR HIER: .dns_zones[] zu .zones[] geändert, um der Response-Struktur zu entsprechen
 
   if [ -z "$ZONE_ID" ] || [ "$ZONE_ID" == "null" ]; then
     log "ERROR: DNS zone ‘$HETZNER_DNS_ZONE_NAME’ could not be found or API request failed: $ZONE_INFO"
