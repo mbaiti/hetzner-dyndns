@@ -42,21 +42,17 @@ get_zone_id() {
 # Get Record ID
 get_record_id() {
   local ZONE_ID=$1
-  # KORREKTUR HIER: Endpunkt geändert zu /v1/zones/$ZONE_ID/rrsets
   RECORD_INFO=$(curl -s -X GET \
     -H "Authorization: Bearer $HETZNER_CLOUD_API_TOKEN" \
-    "https://api.hetzner.cloud/v1/zones/$ZONE_ID/rrsets") # <<< Hier ist die Änderung
+    "https://api.hetzner.cloud/v1/zones/$ZONE_ID/rrsets")
 
-  # Build full hostname for matching in API response.
-  # For Apex record ('@'), Hetzner API's 'name' field is the zone name itself.
-  FULL_HOSTNAME_FOR_MATCH="$HETZNER_DNS_RECORD_NAME"
+  RECORD_NAME_TO_MATCH="$HETZNER_DNS_RECORD_NAME"
   if [ "$HETZNER_DNS_RECORD_NAME" == "@" ]; then
-    FULL_HOSTNAME_FOR_MATCH="$HETZNER_DNS_ZONE_NAME"
-  else
-    FULL_HOSTNAME_FOR_MATCH="$HETZNER_DNS_RECORD_NAME.$HETZNER_DNS_ZONE_NAME"
+    RECORD_NAME_TO_MATCH="@" # Für den Apex Record ist das Name-Feld einfach "@"
   fi
 
-  RECORD_ID=$(echo "$RECORD_INFO" | jq -r '.rrsets[] | select(.name == "'"$FULL_HOSTNAME_FOR_MATCH"'") | select(.type == "A") | .id')
+  # Der .id-Wert ist ein String (z.B. "ddns/A" oder "@/A"), was die API erwartet.
+  RECORD_ID=$(echo "$RECORD_INFO" | jq -r '.rrsets[] | select(.name == "'"$RECORD_NAME_TO_MATCH"'") | select(.type == "A") | .id')
 
   if [ -z "$RECORD_ID" ] || [ "$RECORD_ID" == "null" ]; then
     log "ERROR: DNS record ‘$HETZNER_DNS_RECORD_NAME’ (A-Record) in zone ‘$HETZNER_DNS_ZONE_NAME’ could not be found or API request failed: $RECORD_INFO"
@@ -73,27 +69,23 @@ update_record() {
 
   log "INFO: Update record ‘$HETZNER_DNS_RECORD_NAME’ to $IP_ADDRESS in zone '$HETZNER_DNS_ZONE_NAME'."
 
-  # Build full hostname for the 'name' parameter in the PATCH request body
-  FULL_HOSTNAME_FOR_PATCH="$HETZNER_DNS_RECORD_NAME"
+  RECORD_NAME_FOR_PATCH="$HETZNER_DNS_RECORD_NAME"
   if [ "$HETZNER_DNS_RECORD_NAME" == "@" ]; then
-    FULL_HOSTNAME_FOR_PATCH="$HETZNER_DNS_ZONE_NAME"
-  else
-    FULL_HOSTNAME_FOR_PATCH="$HETZNER_DNS_RECORD_NAME.$HETZNER_DNS_ZONE_NAME"
+    RECORD_NAME_FOR_PATCH="@"
   fi
 
-  # KORREKTUR HIER: Endpunkt geändert zu /v1/zones/$ZONE_ID/rrsets/$RECORD_ID
   RESPONSE=$(curl -s -X PATCH \
     -H "Authorization: Bearer $HETZNER_CLOUD_API_TOKEN" \
     -H "Content-Type: application/json" \
     -d '{
-          "name": "'"$FULL_HOSTNAME_FOR_PATCH"'",
+          "name": "'"$RECORD_NAME_FOR_PATCH"'", # Hier den relativen Namen verwenden
           "type": "A",
           "records": [
             { "value": "'"$IP_ADDRESS"'" }
           ],
           "ttl": 300
         }' \
-    "https://api.hetzner.cloud/v1/zones/$ZONE_ID/rrsets/$RECORD_ID") # <<< Hier ist die Änderung
+    "https://api.hetzner.cloud/v1/zones/$ZONE_ID/rrsets/$RECORD_ID")
 
   if echo "$RESPONSE" | grep -q '"rrset"'; then
     log "INFO: DNS entry for $HETZNER_DNS_RECORD_NAME successfully updated to $IP_ADDRESS."
