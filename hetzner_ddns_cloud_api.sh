@@ -5,6 +5,7 @@ HETZNER_CLOUD_API_TOKEN=${HETZNER_CLOUD_API_TOKEN}
 HETZNER_DNS_ZONE_NAME=${HETZNER_DNS_ZONE_NAME} # E.g., "example.com"
 HETZNER_DNS_RECORD_NAME=${HETZNER_DNS_RECORD_NAME} # E.g., "myhost" or "@" for the zone itself
 CHECK_INTERVAL_SECONDS=${CHECK_INTERVAL_SECONDS:-300}
+IP_ADDRESS_VERSION=${IP_ADDRESS_VERSION:-4}
 
 # Logging
 log() {
@@ -22,6 +23,7 @@ log "Hetzner Dynamic DNS Updater started."
 log "Check interval: $CHECK_INTERVAL_SECONDS Seconds."
 log "DNS Zone Name: $HETZNER_DNS_ZONE_NAME"
 log "DNS Record Name: $HETZNER_DNS_RECORD_NAME"
+log "IP Address Version: $IP_ADDRESS_VERSION"
 
 # Check Zone ID
 get_zone_id() {
@@ -108,7 +110,7 @@ if [ $? -ne 0 ]; then exit 1; fi
 log "INFO: Found DNS Record ID for '$HETZNER_DNS_RECORD_NAME': $RECORD_ID"
 
 while true; do
-  PUBLIC_IP=$(curl -s https://ipv4.icanhazip.com)
+  PUBLIC_IP=$(curl -s https://ipv${IP_ADDRESS_VERSION}.icanhazip.com)
 
   if [ -z "$PUBLIC_IP" ]; then
     log "WARNING: Could not determine public IP address. Retrying."
